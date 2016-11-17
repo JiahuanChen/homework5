@@ -52,12 +52,23 @@ def checkinput(arg):
             if len(sequences) != 2:
                 print("Sequences error!")
                 return 0
+        #check if sequences and matrix match each other
+        letter_dict = {}
+        # record all the allowed letters
+        for i in letters:
+            letter_dict[i] = 1
+        # if letter in the sequence not founded, return 0
+        for i in range(0,2):
+            for l in sequences[i]:
+                if letter_dict[l] == None:
+                    return 0
     return (letters,score_dict,gap,sequences,seq_name)
     
 if __name__ == '__main__':
     task = checkinput(sys.argv)
     #task = 0 if something goes wrong, else go on processing
     #[0] allowed letters [1] matrix(dictionary) [2] gap [3] list of 2 sequences
+    # if task = 0, meaning there are errors and this script will end
     if task:
         gap = task[2]
         seq1 = task[3][0]
