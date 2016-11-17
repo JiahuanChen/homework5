@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 """
-Created on Sun Nov 13 13:05:48 2016
-
-@author: blowv6
+I worked with Wen Ya and Gong Haohan.
 """
 import sys
 
@@ -11,6 +9,7 @@ import sys
 #   [1] matrix(dictionary form)
 #   [2] gap
 #   [3] list of 2 sequences
+#   [4] list of 2 sequence names
 def checkinput(arg):
     l = len(arg)
     #check if there are 2 arguments
@@ -43,15 +42,17 @@ def checkinput(arg):
             lines = seq.readlines()
             #check if contain 2 sequences
             sequences = []
+            seq_name = []
             for line in lines:
                 if line[0] == ">":
                     sequences.append("")
+                    seq_name.append(line.strip())
                 else:
                     sequences[-1]+=line.strip()
             if len(sequences) != 2:
                 print("Sequences error!")
                 return 0
-    return (letters,score_dict,gap,sequences)
+    return (letters,score_dict,gap,sequences,seq_name)
     
 if __name__ == '__main__':
     task = checkinput(sys.argv)
@@ -65,18 +66,59 @@ if __name__ == '__main__':
         seq2_len = len(task[3][1])
         score_dict = task[1]
         #task3 dynamic programming matrix
+        #initialize the first column and row
         dp_matrix = [[0 for i in range(seq1_len+1)] for j in range(seq2_len+1)]
         for i in range(1,seq1_len+1):
             dp_matrix[0][i] = dp_matrix[0][i-1]+gap
         for i in range(1,seq2_len+1):
             dp_matrix[i][0] = dp_matrix[i-1][0]+gap
+        #calculate the matrix
         for i in range(1,seq2_len+1):
             for j in range(1,seq1_len+1):
                 pair = seq1[j-1]+seq2[i-1]
                 dp_matrix[i][j] = max(dp_matrix[i-1][j-1]+score_dict[pair],\
                                     dp_matrix[i-1][j]+gap,\
                                     dp_matrix[i][j-1]+gap)
+        #output the matrix
         for i in dp_matrix:
             i = [str(a) for a in i]
             i = ' '.join(i)
             print(i)
+        
+        
+        #task 4 trace back
+        #start from right bottom
+        col = seq1_len
+        row = seq2_len
+        
+        seq1_align = ""
+        seq2_align = ""
+            
+        while(col > 0 or row > 0):
+            pair = seq1[col-1]+seq2[row-1]
+            # check where this score is from
+            # from up left
+            if dp_matrix[row][col] == dp_matrix[row-1][col-1]+score_dict[pair]:
+                seq1_align += seq1[col-1]
+                seq2_align += seq2[row-1]
+                row -= 1
+                col -= 1
+            # from up
+            elif dp_matrix[row][col] == dp_matrix[row-1][col]+gap:
+                seq1_align += "-"
+                seq2_align += seq2[row-1]
+                row -= 1
+            # from left
+            elif dp_matrix[row][col] == dp_matrix[row][col-1]+gap:
+                seq1_align += seq1[col-1]
+                seq2_align += "-"
+                col -= 1
+            
+        # reverse the string
+        seq1_align = seq1_align[::-1]
+        seq2_align = seq2_align[::-1]
+        # output the alignment
+        print(task[4][0])
+        print(seq1_align)
+        print(task[4][1])
+        print(seq2_align)
